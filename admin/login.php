@@ -28,5 +28,5 @@ if (is_post()) {
   <label>Admin ID / email<input type="text" name="email" value="<?= e($email) ?>" required autofocus autocomplete="username"></label>
   <label>Password<input type="password" name="password" required></label>
   <button class="btn btn-primary btn-block">Log in</button>
-  <p class="center small"><a href="<?= e(url('')) ?>/">← Back to website</a></p>
+  <p class="center small"><a href="<?= e(url('')) ?>">← Back to website</a></p>
 </form></body></html>

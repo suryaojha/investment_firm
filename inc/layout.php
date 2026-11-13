@@ -74,7 +74,7 @@ function public_header(string $title = '', array $o = []): void {
 <?php endif; ?>
 <header class="site-header" id="top">
   <div class="container nav-wrap">
-    <a class="brand" href="<?= e(url('')) ?>/">
+    <a class="brand" href="<?= e(url('')) ?>">
       <?php if (setting('logo')): ?><img src="<?= e(media(setting('logo'))) ?>" alt="<?= e($site) ?>"><?php else: ?><span class="brand-mark">◆</span><span class="brand-text"><?= e($site) ?></span><?php endif; ?>
     </a>
     <button class="nav-toggle" aria-label="Menu" aria-expanded="false" onclick="document.body.classList.toggle('nav-open');this.setAttribute('aria-expanded',document.body.classList.contains('nav-open'))"><span></span><span></span><span></span></button>

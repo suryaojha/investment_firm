@@ -64,7 +64,7 @@ if (is_post() && $ok) {
   <?php if ($done): ?>
     <div class="alert alert-ok"><strong>Installed successfully.</strong></div>
     <p>Your admin account is ready. Next: log in, then open <strong>Settings</strong> to add your logo, colours, bank/UPI details, payment gateway and email (SMTP).</p>
-    <p><a class="btn btn-primary" href="<?= e(url('admin/login.php')) ?>">Go to admin login →</a> &nbsp; <a class="btn btn-ghost" href="<?= e(url('')) ?>/">View website</a></p>
+    <p><a class="btn btn-primary" href="<?= e(url('admin/login.php')) ?>">Go to admin login →</a> &nbsp; <a class="btn btn-ghost" href="<?= e(url('')) ?>">View website</a></p>
     <p class="muted small">For security, you may also delete <code>install.php</code> from the server.</p>
   <?php else: ?>
     <ul class="checks"><?php foreach ($checks as $k => $r): ?><li class="<?= $r ? 'ok' : 'bad' ?>"><?= $r ? '✔' : '✖' ?> <?= e($k) ?></li><?php endforeach; ?></ul>

@@ -43,7 +43,7 @@ function admin_header(string $title): void {
     <?php endforeach; ?>
   <?php endforeach; ?>
   <div class="sb-group">Quick</div>
-  <a href="<?= e(url('')) ?>/" target="_blank"><span>🌐</span>View website ↗</a>
+  <a href="<?= e(url('')) ?>" target="_blank"><span>🌐</span>View website ↗</a>
   <a href="<?= e(url('admin/password.php')) ?>"><span>🔑</span>Change password</a>
   <a href="<?= e(url('logout.php')) ?>"><span>🚪</span>Log out</a>
 </aside>
