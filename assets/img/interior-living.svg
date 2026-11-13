@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+<defs><linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4efe6"/><stop offset="1" stop-color="#e5dccb"/></linearGradient>
+<linearGradient id="view" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#8ec9f2"/><stop offset="1" stop-color="#e8f5ff"/></linearGradient>
+<linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9a77a"/><stop offset="1" stop-color="#9c7a50"/></linearGradient></defs>
+<rect width="1200" height="800" fill="url(#wall)"/>
+<rect x="0" y="560" width="1200" height="240" fill="url(#floor)"/><g stroke="#8a6a44" stroke-opacity=".35"><path d="M0 620H1200M0 690H1200M0 760H1200"/></g>
+<rect x="190" y="90" width="520" height="380" fill="#fff" stroke="#d7ccb6" stroke-width="12"/><rect x="204" y="104" width="492" height="352" fill="url(#view)"/>
+<g fill="#aab9cf"><rect x="230" y="300" width="60" height="156"/><rect x="310" y="250" width="80" height="206"/><rect x="410" y="320" width="50" height="136"/><rect x="480" y="270" width="70" height="186"/><rect x="570" y="330" width="90" height="126"/></g>
+<rect x="446" y="104" width="8" height="352" fill="#fff"/><rect x="204" y="270" width="492" height="8" fill="#fff"/>
+<g><rect x="180" y="90" width="22" height="470" fill="#e9dfc9" opacity=".9"/><rect x="700" y="90" width="22" height="470" fill="#e9dfc9" opacity=".9"/></g>
+<!-- sofa -->
+<g><rect x="250" y="420" width="560" height="170" rx="30" fill="#2c4a7a"/><rect x="230" y="470" width="60" height="120" rx="20" fill="#223b63"/><rect x="770" y="470" width="60" height="120" rx="20" fill="#223b63"/>
+<rect x="280" y="470" width="500" height="80" rx="18" fill="#3a5d95"/><rect x="300" y="440" width="120" height="70" rx="16" fill="#e3b85c"/><rect x="660" y="440" width="110" height="70" rx="16" fill="#f4efe6"/></g>
+<rect x="320" y="620" width="380" height="26" rx="8" fill="#6b4a2b"/><rect x="340" y="646" width="10" height="40" fill="#4a3320"/><rect x="670" y="646" width="10" height="40" fill="#4a3320"/>
+<ellipse cx="510" cy="615" rx="230" ry="26" fill="#fff" opacity=".18"/>
+<!-- lamp & plant -->
+<g><rect x="940" y="300" width="8" height="280" fill="#3a3a3a"/><path d="M890 300h108l-24-70h-60z" fill="#f6d98e"/></g>
+<g><rect x="1040" y="480" width="70" height="90" rx="10" fill="#b0663c"/><path d="M1075 480q-60-90-30-170q40 60 30 170zM1075 480q50-70 80-140q-70 20-80 140z" fill="#3c9d5c"/></g>
+<rect x="840" y="120" width="200" height="130" fill="#e3b85c" opacity=".25" stroke="#c8a24a" stroke-width="6"/><circle cx="940" cy="185" r="38" fill="#c8a24a" opacity=".5"/>
+</svg>

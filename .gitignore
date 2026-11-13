@@ -1,0 +1,11 @@
+config.local.php
+storage/db/*
+storage/logs/*
+storage/kyc/*
+storage/proofs/*
+!storage/*/.gitkeep
+uploads/*
+!uploads/.htaccess
+*.sqlite
+.DS_Store
+Thumbs.db
