@@ -1,1 +1,1 @@
-Require all denied
+# Intentionally empty (Wasmer's .htaccess evaluator rejects Apache-only directives).
