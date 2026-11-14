@@ -162,6 +162,10 @@ function seed_content(PDO $pdo): void {
 
 function upgrade_schema(PDO $pdo): void {
     $mysql = db_is_mysql();
+    $tail = $mysql ? ' ENGINE=InnoDB DEFAULT CHARSET=utf8mb4' : '';
+    $pk = $mysql ? 'INT AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT';
+    $pdo->exec("CREATE TABLE IF NOT EXISTS referral_commissions (id $pk, referrer_id INT NOT NULL, referred_user_id INT NOT NULL, investment_id INT NOT NULL UNIQUE, amount DECIMAL(16,2) NOT NULL, rate DECIMAL(6,2) NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'credited', created_at VARCHAR(30))$tail");
+    $pdo->exec("CREATE TABLE IF NOT EXISTS wallet_transactions (id $pk, user_id INT NOT NULL, investment_id INT, type VARCHAR(20) NOT NULL, amount DECIMAL(16,2) NOT NULL, description VARCHAR(255), created_at VARCHAR(30))$tail");
     $columns = ['users' => ['referral_code' => 'VARCHAR(32) NULL', 'referred_by' => 'INT NULL', 'wallet_balance' => 'DECIMAL(16,2) NOT NULL DEFAULT 0'], 'investments' => ['wallet_used' => 'DECIMAL(16,2) NOT NULL DEFAULT 0']];
     foreach ($columns as $table => $defs) foreach ($defs as $column => $definition) {
         if ($mysql) { $st = $pdo->prepare('SHOW COLUMNS FROM ' . $table . ' LIKE ?'); $st->execute([$column]); $exists = (bool)$st->fetch(); }
