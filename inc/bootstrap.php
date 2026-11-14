@@ -23,6 +23,7 @@ if (!INSTALLED) {
     }
 } else {
     require ROOT . '/inc/db.php';
+    upgrade_schema(db());
     require ROOT . '/inc/settings_schema.php';
     require ROOT . '/inc/mailer.php';
     require ROOT . '/inc/pdf.php';
