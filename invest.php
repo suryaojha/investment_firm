@@ -18,7 +18,8 @@ if (is_post() && $sel) {
     if ($max > 0 && $amount > $max) $errors[] = 'Maximum investment for ' . $sel['name'] . ' is ' . inr($max) . '. Please choose a higher plan.';
     $walletUsed = isset($_POST['use_wallet']) ? min($walletBalance, $amount) : 0;
     if ($amount > 100000000) $errors[] = 'Please contact us directly for investments above ₹10 Cr.';
-    if (!isset($methods[$method])) $errors[] = 'Please choose a payment method.';
+    if ($walletUsed >= $amount && $walletUsed > 0) $method = 'wallet';
+    elseif (!isset($methods[$method])) $errors[] = 'Please choose a payment method.';
     if (empty($_POST['terms'])) $errors[] = 'Please accept the Terms & Conditions to continue.';
     if (!$errors) {
         $id = create_investment($user, $sel, $amount, $method, $walletUsed);
