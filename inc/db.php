@@ -29,7 +29,7 @@ function create_schema(PDO $pdo, bool $mysql): void {
         "CREATE TABLE IF NOT EXISTS users (
             id $pk, name VARCHAR(150) NOT NULL, email VARCHAR(190) NOT NULL UNIQUE, phone VARCHAR(20), password VARCHAR(255) NOT NULL,
             role VARCHAR(20) NOT NULL DEFAULT 'user', status VARCHAR(20) NOT NULL DEFAULT 'active',
-            city VARCHAR(100), address TEXT, dob VARCHAR(20),
+            city VARCHAR(100), address TEXT, dob VARCHAR(20), referral_code VARCHAR(32) UNIQUE, referred_by INT, wallet_balance DECIMAL(16,2) NOT NULL DEFAULT 0,
             pan VARCHAR(20), aadhaar_enc TEXT, aadhaar_last4 VARCHAR(4), pan_file VARCHAR(255), aadhaar_file VARCHAR(255),
             kyc_status VARCHAR(20) NOT NULL DEFAULT 'none', kyc_note TEXT, kyc_submitted_at VARCHAR(30),
             nominee_name VARCHAR(150), nominee_relation VARCHAR(60),
@@ -51,7 +51,7 @@ function create_schema(PDO $pdo, bool $mysql): void {
             id $pk, ref_no VARCHAR(40) NOT NULL UNIQUE, user_id INT NOT NULL, plan_id INT NOT NULL, amount DECIMAL(16,2) NOT NULL,
             roi DECIMAL(6,2) NOT NULL DEFAULT 0, tenure_months INT NOT NULL DEFAULT 24, payout_mode VARCHAR(20) NOT NULL DEFAULT 'quarterly',
             expected_return DECIMAL(16,2) NOT NULL DEFAULT 0, method VARCHAR(20), status VARCHAR(20) NOT NULL DEFAULT 'pending',
-            gateway_order_id VARCHAR(100), gateway_payment_id VARCHAR(100), txn_id VARCHAR(100), proof_file VARCHAR(255), note TEXT,
+            gateway_order_id VARCHAR(100), gateway_payment_id VARCHAR(100), txn_id VARCHAR(100), proof_file VARCHAR(255), note TEXT, wallet_used DECIMAL(16,2) NOT NULL DEFAULT 0,
             certificate_no VARCHAR(40), created_at VARCHAR(30), paid_at VARCHAR(30), maturity_date VARCHAR(20)
         )$tail",
         "CREATE TABLE IF NOT EXISTS payouts (
@@ -77,6 +77,8 @@ function create_schema(PDO $pdo, bool $mysql): void {
         )$tail",
         "CREATE TABLE IF NOT EXISTS login_attempts (id $pk, ip VARCHAR(45), email VARCHAR(190), created_at VARCHAR(30))$tail",
         "CREATE TABLE IF NOT EXISTS audit (id $pk, user_id INT, action VARCHAR(80), detail VARCHAR(500), ip VARCHAR(45), created_at VARCHAR(30))$tail",
+        "CREATE TABLE IF NOT EXISTS referral_commissions (id $pk, referrer_id INT NOT NULL, referred_user_id INT NOT NULL, investment_id INT NOT NULL UNIQUE, amount DECIMAL(16,2) NOT NULL, rate DECIMAL(6,2) NOT NULL, status VARCHAR(20) NOT NULL DEFAULT 'credited', created_at VARCHAR(30))$tail",
+        "CREATE TABLE IF NOT EXISTS wallet_transactions (id $pk, user_id INT NOT NULL, investment_id INT, type VARCHAR(20) NOT NULL, amount DECIMAL(16,2) NOT NULL, description VARCHAR(255), created_at VARCHAR(30))$tail",
     ];
     foreach ($t as $sql) $pdo->exec($sql);
 }
