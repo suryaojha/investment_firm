@@ -6,6 +6,8 @@ $inv = get_investment((int)get('id'));
 if (!$inv || (int)$inv['user_id'] !== (int)$user['id']) { http_response_code(404); exit('Investment not found.'); }
 if ($inv['status'] === 'confirmed') { flash('ok', 'This investment is already confirmed.'); redirect('dashboard.php'); }
 if (in_array($inv['status'], ['rejected', 'cancelled'], true)) { flash('bad', 'This investment is ' . $inv['status'] . '.'); redirect('dashboard.php'); }
+$dueAmount = max(0, (float)$inv['amount'] - (float)($inv['wallet_used'] ?? 0));
+if ($dueAmount <= 0 && $inv['status'] !== 'confirmed') { confirm_investment((int)$inv['id'], 'WALLET' . strtoupper(bin2hex(random_bytes(4)))); flash('ok', 'Plan purchased using referral wallet credit.'); redirect('dashboard.php'); }
 $plan = db()->prepare('SELECT * FROM plans WHERE id = ?'); $plan->execute([$inv['plan_id']]); $plan = $plan->fetch() ?: ['name' => 'Plan'];
 $errors = [];
 
@@ -13,6 +15,7 @@ if (is_post()) {
     csrf_verify();
     $act = post('action');
     if ($act === 'cancel' && $inv['status'] === 'pending') {
+        refund_investment_wallet($inv);
         db()->prepare("UPDATE investments SET status='cancelled' WHERE id=?")->execute([$inv['id']]);
         flash('info', 'Investment cancelled.'); redirect('dashboard.php');
     }
@@ -42,7 +45,7 @@ $rzp = null;
 if ($inv['method'] === 'razorpay') {
     try {
         $orderId = $inv['gateway_order_id'] ?: rzp_create_order($inv)['id']; // reuse the order on page reloads
-        $rzp = ['key' => setting('razorpay_key_id'), 'order' => $orderId, 'amount' => (int)round($inv['amount'] * 100)];
+        $rzp = ['key' => setting('razorpay_key_id'), 'order' => $orderId, 'amount' => (int)round($dueAmount * 100)];
     } catch (Throwable $e) { error_log('[RZP] ' . $e->getMessage()); $errors[] = 'We could not start the online payment. Please try again or contact support.'; }
 }
 public_header('Complete payment', ['body' => 'app', 'noindex' => 1]);
@@ -52,7 +55,7 @@ public_header('Complete payment', ['body' => 'app', 'noindex' => 1]);
   <div class="card form">
     <?= flashes() ?>
     <?php foreach ($errors as $er): ?><div class="alert alert-bad"><?= e($er) ?></div><?php endforeach; ?>
-    <div class="pay-amount"><span>Amount payable</span><b><?= inr($inv['amount'], 2) ?></b></div>
+    <div class="pay-amount"><span>Amount payable</span><b><?= inr($dueAmount, 2) ?></b></div>
 
     <?php if ($inv['method'] === 'razorpay' && $rzp): ?>
       <p>Pay securely with UPI, cards or netbanking. Your investment is confirmed automatically as soon as the payment succeeds.</p>
