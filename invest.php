@@ -7,7 +7,7 @@ $methods = enabled_methods();
 $selId = (int)(is_post() ? post('plan_id') : get('plan'));
 $sel = null; foreach ($plans as $p) if ((int)$p['id'] === $selId) $sel = $p;
 $sel = $sel ?: ($plans[1] ?? ($plans[0] ?? null));
-$errors = [];
+$errors = []; $walletBalance = (float)$user['wallet_balance'];
 
 if (is_post() && $sel) {
     csrf_verify();
@@ -16,11 +16,12 @@ if (is_post() && $sel) {
     $min = max((float)$sel['min_amount'], (float)setting('min_invest', 0)); $max = (float)$sel['max_amount'];
     if ($amount < $min) $errors[] = 'Minimum investment for ' . $sel['name'] . ' is ' . inr($min) . '.';
     if ($max > 0 && $amount > $max) $errors[] = 'Maximum investment for ' . $sel['name'] . ' is ' . inr($max) . '. Please choose a higher plan.';
+    $walletUsed = isset($_POST['use_wallet']) ? min($walletBalance, $amount) : 0;
     if ($amount > 100000000) $errors[] = 'Please contact us directly for investments above ₹10 Cr.';
     if (!isset($methods[$method])) $errors[] = 'Please choose a payment method.';
     if (empty($_POST['terms'])) $errors[] = 'Please accept the Terms & Conditions to continue.';
     if (!$errors) {
-        $id = create_investment($user, $sel, $amount, $method);
+        $id = create_investment($user, $sel, $amount, $method, $walletUsed);
         audit('investment.created', "#$id $amount $method");
         redirect('pay.php?id=' . $id);
     }
@@ -48,6 +49,7 @@ public_header('Invest', ['body' => 'app', 'noindex' => 1]);
     <h3>2. Amount</h3>
     <label>Investment amount (₹)<input type="number" name="amount" id="amount" value="<?= e($amountVal) ?>" min="1" step="1" inputmode="numeric" required></label>
     <div class="chips" id="chips"></div>
+    <?php if ($walletBalance > 0): ?><label class="check"><input type="checkbox" name="use_wallet" value="1" <?= isset($_POST['use_wallet']) ? 'checked' : '' ?>> Apply referral wallet credit (available: <?= inr($walletBalance, 2) ?>). Wallet credit is only for plan purchases.</label><?php endif; ?>
     <h3>3. Payment method</h3>
     <?php if (!$methods): ?><div class="alert alert-bad">Payments are not configured yet. Please contact support.</div><?php endif; ?>
     <?php foreach ($methods as $k => $label): ?>
