@@ -2,6 +2,8 @@
 require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/layout.php';
 $u = require_login();
+$myReferralCode = get_or_create_referral_code((int)$u['id']);
+$referralLink = site_url('register.php?ref=' . rawurlencode($myReferralCode));
 if ($u['role'] === 'admin' && !get('as')) { /* admins can still view their own dashboard */ }
 
 if (is_post()) { // change password / profile
@@ -50,6 +52,8 @@ public_header('My dashboard', ['body' => 'app', 'noindex' => 1]);
     <?php if ($u['kyc_status'] !== 'submitted'): ?><a class="btn btn-dark" href="<?= e(url('kyc.php')) ?>"><?= $u['kyc_status'] === 'rejected' ? 'Resubmit KYC' : 'Submit PAN & Aadhaar' ?></a><?php else: ?><a class="btn btn-ghost-dark" href="<?= e(url('kyc.php')) ?>">View</a><?php endif; ?>
   </div>
   <?php endif; ?>
+
+  <div class="card"><h3>Referral rewards</h3><p>Share your referral link. You earn the admin-configured commission only after the referred person’s first plan purchase is confirmed. Credits can only be used toward your own plan purchases.</p><p><b>Your referral code:</b> <code><?= e($myReferralCode) ?></code></p><p><b>Referral link:</b> <a href="<?= e($referralLink) ?>"><?= e($referralLink) ?></a></p><p><b>Available plan wallet:</b> <?= inr((float)$u['wallet_balance'], 2) ?></p></div>
 
   <div class="kpis">
     <div class="kpi"><span>Total invested</span><b><?= inr($invested) ?></b></div>
