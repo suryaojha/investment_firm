@@ -33,8 +33,8 @@ if (is_post()) {
         if (!$errors) {
             db()->prepare("UPDATE investments SET status='submitted', txn_id=?, proof_file=COALESCE(?, proof_file), note=? WHERE id=?")->execute([$utr, $proof, mb_substr(post('note'), 0, 250), $inv['id']]);
             audit('investment.utr_submitted', $inv['ref_no'] . ' ' . $utr);
-            if ($n = trim(setting('notify_email'))) send_mail($n, 'Payment to verify — ' . $inv['ref_no'], '<p>' . e($user['name']) . ' submitted UTR <strong>' . e($utr) . '</strong> for ' . inr($inv['amount']) . ' (' . e($inv['ref_no']) . '). Verify in Admin → Investments.</p>');
-            send_mail($user['email'], 'Payment details received — ' . $inv['ref_no'], '<p>Hi ' . e($user['name']) . ',</p><p>We received your UTR <strong>' . e($utr) . '</strong> for <strong>' . inr($inv['amount']) . '</strong>. Our team will verify it shortly and email your certificate and transaction ID.</p>');
+            if ($n = trim(setting('notify_email'))) send_mail($n, 'Payment to verify — ' . $inv['ref_no'], '<p>' . e($user['name']) . ' submitted UTR <strong>' . e($utr) . '</strong> for ' . inr($dueAmount) . ' (' . e($inv['ref_no']) . '). Verify in Admin → Investments.</p>');
+            send_mail($user['email'], 'Payment details received — ' . $inv['ref_no'], '<p>Hi ' . e($user['name']) . ',</p><p>We received your UTR <strong>' . e($utr) . '</strong> for <strong>' . inr($dueAmount) . '</strong>. Our team will verify it shortly and email your certificate and transaction ID.</p>');
             flash('ok', 'Thank you! We have received your payment details and will verify them shortly.');
             redirect('dashboard.php');
         }
@@ -59,7 +59,7 @@ public_header('Complete payment', ['body' => 'app', 'noindex' => 1]);
 
     <?php if ($inv['method'] === 'razorpay' && $rzp): ?>
       <p>Pay securely with UPI, cards or netbanking. Your investment is confirmed automatically as soon as the payment succeeds.</p>
-      <button type="button" id="rzp-btn" class="btn btn-gold btn-block btn-lg">Pay <?= inr($inv['amount']) ?> securely</button>
+      <button type="button" id="rzp-btn" class="btn btn-gold btn-block btn-lg">Pay <?= inr($dueAmount) ?> securely</button>
       <form id="rzp-form" method="post" action="<?= e(url('payment_callback.php')) ?>">
         <?= csrf_field() ?><input type="hidden" name="investment_id" value="<?= (int)$inv['id'] ?>">
         <input type="hidden" name="razorpay_payment_id" id="rp-pid"><input type="hidden" name="razorpay_order_id" id="rp-oid"><input type="hidden" name="razorpay_signature" id="rp-sig">
@@ -94,7 +94,7 @@ public_header('Complete payment', ['body' => 'app', 'noindex' => 1]);
           <?php foreach (['upi_id' => 'UPI ID', 'bank_holder' => 'Account name', 'bank_name' => 'Bank', 'bank_account' => 'Account number', 'bank_ifsc' => 'IFSC'] as $k => $label) if (trim(setting($k))): ?>
             <dt><?= e($label) ?></dt><dd><?= e(setting($k)) ?></dd>
           <?php endif; ?>
-          <dt>Amount</dt><dd><b><?= inr($inv['amount'], 2) ?></b></dd><dt>Remark</dt><dd><?= e($inv['ref_no']) ?></dd>
+          <dt>Amount</dt><dd><b><?= inr($dueAmount, 2) ?></b></dd><dt>Remark</dt><dd><?= e($inv['ref_no']) ?></dd>
         </dl>
       </div>
       <h3>Step 2 — Submit your UTR / transaction ID</h3>
