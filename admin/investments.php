@@ -13,6 +13,7 @@ if (is_post()) {
         confirm_investment((int)$inv['id'], $txn);
         flash('ok', 'Investment confirmed. Certificate & transaction ID emailed to the investor.');
     } elseif ($act === 'reject' && $inv['status'] !== 'confirmed') {
+        refund_investment_wallet($inv);
         $pdo->prepare("UPDATE investments SET status='rejected', note=? WHERE id=?")->execute([mb_substr(post('reason'), 0, 250), $inv['id']]);
         [$user] = investment_context($inv);
         send_mail($user['email'], 'Payment could not be verified — ' . $inv['ref_no'], '<p>Hi ' . e($user['name']) . ',</p><p>We could not verify the payment for investment <b>' . e($inv['ref_no']) . '</b>.' . (post('reason') ? ' Reason: ' . e(post('reason')) : '') . '</p><p>Please contact us with your payment details.</p>');
