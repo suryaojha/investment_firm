@@ -14,7 +14,7 @@ try {
         throw new RuntimeException('Signature mismatch');
     // Double-check with the gateway: amount, order and status.
     $pay = rzp_request('GET', '/payments/' . rawurlencode($pid));
-    if (($pay['order_id'] ?? '') !== $oid || (int)$pay['amount'] !== (int)round($inv['amount'] * 100)) throw new RuntimeException('Amount/order mismatch');
+    if (($pay['order_id'] ?? '') !== $oid || (int)$pay['amount'] !== (int)round(max(0, (float)$inv['amount'] - (float)($inv['wallet_used'] ?? 0)) * 100)) throw new RuntimeException('Amount/order mismatch');
     if (($pay['status'] ?? '') === 'authorized')
         $pay = rzp_request('POST', '/payments/' . rawurlencode($pid) . '/capture', ['amount' => (int)$pay['amount'], 'currency' => 'INR']);
     if (($pay['status'] ?? '') !== 'captured') throw new RuntimeException('Payment not captured: ' . ($pay['status'] ?? '?'));
