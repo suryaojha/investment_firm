@@ -69,16 +69,13 @@ function flashes(): string {
 
 // ---- Auth ----
 function current_user(): ?array {
-    static $u = false;
-    if ($u !== false) return $u;
-    $u = null;
-    if (!empty($_SESSION['uid'])) {
-        $st = db()->prepare('SELECT * FROM users WHERE id = ?');
-        $st->execute([$_SESSION['uid']]);
-        $row = $st->fetch();
-        if ($row && $row['status'] === 'active') $u = $row; else unset($_SESSION['uid']);
-    }
-    return $u;
+    if (empty($_SESSION['uid'])) return null;
+    $st = db()->prepare('SELECT * FROM users WHERE id = ?');
+    $st->execute([$_SESSION['uid']]);
+    $row = $st->fetch();
+    if ($row && $row['status'] === 'active') return $row;
+    unset($_SESSION['uid']);
+    return null;
 }
 function require_login(): array {
     $u = current_user();
