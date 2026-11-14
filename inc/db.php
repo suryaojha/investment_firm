@@ -159,3 +159,18 @@ function seed_content(PDO $pdo): void {
     $ins('pages', ['slug' => 'privacy', 'title' => 'Privacy Policy', 'content' => $privacy, 'updated_at' => now()]);
     $ins('pages', ['slug' => 'risk-disclosure', 'title' => 'Risk Disclosure', 'content' => '<p>Real-estate investments are subject to market, construction and regulatory risks. Projected returns are not guaranteed. Please read all offer documents and consult an independent financial adviser if needed.</p>', 'updated_at' => now()]);
 }
+
+function upgrade_schema(PDO $pdo): void {
+    $mysql = db_is_mysql();
+    $columns = ['users' => ['referral_code' => 'VARCHAR(32) NULL', 'referred_by' => 'INT NULL', 'wallet_balance' => 'DECIMAL(16,2) NOT NULL DEFAULT 0'], 'investments' => ['wallet_used' => 'DECIMAL(16,2) NOT NULL DEFAULT 0']];
+    foreach ($columns as $table => $defs) foreach ($defs as $column => $definition) {
+        if ($mysql) { $st = $pdo->prepare('SHOW COLUMNS FROM ' . $table . ' LIKE ?'); $st->execute([$column]); $exists = (bool)$st->fetch(); }
+        else { $exists = false; foreach ($pdo->query('PRAGMA table_info(' . $table . ')')->fetchAll() as $info) if ($info['name'] === $column) { $exists = true; break; } }
+        if (!$exists) {
+            if (!$mysql && $column === 'referral_code') $pdo->exec('ALTER TABLE ' . $table . ' ADD COLUMN ' . $column . ' TEXT');
+            elseif (!$mysql && $column === 'referred_by') $pdo->exec('ALTER TABLE ' . $table . ' ADD COLUMN ' . $column . ' INTEGER');
+            elseif (!$mysql) $pdo->exec('ALTER TABLE ' . $table . ' ADD COLUMN ' . $column . ' NUMERIC NOT NULL DEFAULT 0');
+            else $pdo->exec('ALTER TABLE ' . $table . ' ADD COLUMN ' . $column . ' ' . $definition);
+        }
+    }
+}
