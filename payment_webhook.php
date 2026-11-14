@@ -12,7 +12,7 @@ $ev = json_decode($body, true);
 if (($ev['event'] ?? '') === 'payment.captured') {
     $p = $ev['payload']['payment']['entity'] ?? [];
     $st = db()->prepare('SELECT * FROM investments WHERE gateway_order_id = ?'); $st->execute([$p['order_id'] ?? '']); $inv = $st->fetch();
-    if ($inv && $inv['status'] !== 'confirmed' && (int)$p['amount'] === (int)round($inv['amount'] * 100)) confirm_investment((int)$inv['id'], (string)$p['id'], (string)$p['id']);
+    if ($inv && $inv['status'] !== 'confirmed' && (int)$p['amount'] === (int)round(max(0, (float)$inv['amount'] - (float)($inv['wallet_used'] ?? 0)) * 100)) confirm_investment((int)$inv['id'], (string)$p['id'], (string)$p['id']);
 }
 http_response_code(200);
 echo 'ok';
