@@ -25,12 +25,15 @@ function new_ref_no(): string {
     return $ref;
 }
 
-function create_investment(array $user, array $plan, float $amount, string $method): int {
-    $roi = plan_total_roi($plan);
-    db()->prepare('INSERT INTO investments (ref_no,user_id,plan_id,amount,roi,tenure_months,payout_mode,expected_return,method,status,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
-        ->execute([new_ref_no(), $user['id'], $plan['id'], $amount, $roi, $plan['tenure_months'], $plan['payout_mode'],
-                   calc_expected_return($amount, $roi, (int)$plan['tenure_months']), $method, 'pending', now()]);
-    return (int)db()->lastInsertId();
+function create_investment(array $user, array $plan, float $amount, string $method, float $walletUsed = 0): int {
+    $pdo = db(); $walletUsed = round(max(0, min($walletUsed, $amount)), 2); $roi = plan_total_roi($plan); $pdo->beginTransaction();
+    try {
+        if ($walletUsed > 0) { $st = $pdo->prepare('UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ? AND wallet_balance >= ?'); $st->execute([$walletUsed, $user['id'], $walletUsed]); if ($st->rowCount() !== 1) throw new RuntimeException('Referral wallet balance changed. Refresh and retry.'); }
+        $pdo->prepare('INSERT INTO investments (ref_no,user_id,plan_id,amount,roi,tenure_months,payout_mode,expected_return,method,status,created_at,wallet_used) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)')->execute([new_ref_no(), $user['id'], $plan['id'], $amount, $roi, $plan['tenure_months'], $plan['payout_mode'], calc_expected_return($amount, $roi, (int)$plan['tenure_months']), $method, 'pending', now(), $walletUsed]);
+        $id = (int)$pdo->lastInsertId();
+        if ($walletUsed > 0) $pdo->prepare('INSERT INTO wallet_transactions (user_id,investment_id,type,amount,description,created_at) VALUES (?,?,?,?,?,?)')->execute([$user['id'], $id, 'debit', $walletUsed, 'Wallet applied to plan purchase', now()]);
+        $pdo->commit(); return $id;
+    } catch (Throwable $e) { $pdo->rollBack(); throw $e; }
 }
 
 function get_investment(int $id): ?array {
@@ -77,6 +80,7 @@ function confirm_investment(int $id, string $txnId = '', string $gatewayPaymentI
         $pdo->commit();
     } catch (Throwable $e) { $pdo->rollBack(); throw $e; }
 
+    credit_referral_commission($inv);
     audit('investment.confirmed', $inv['ref_no'] . ' ' . $inv['amount']);
     notify_investment_confirmed($inv);
     return true;
