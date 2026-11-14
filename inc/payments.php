@@ -27,7 +27,7 @@ function rzp_request(string $method, string $path, ?array $data = null): array {
 
 function rzp_create_order(array $inv): array {
     $order = rzp_request('POST', '/orders', [
-        'amount' => (int)round($inv['amount'] * 100), 'currency' => 'INR', 'receipt' => $inv['ref_no'],
+        'amount' => (int)round(max(0, (float)$inv['amount'] - (float)($inv['wallet_used'] ?? 0)) * 100), 'currency' => 'INR', 'receipt' => $inv['ref_no'],
         'notes' => ['investment_id' => (string)$inv['id'], 'ref' => $inv['ref_no']],
     ]);
     db()->prepare('UPDATE investments SET gateway_order_id = ? WHERE id = ?')->execute([$order['id'], $inv['id']]);
