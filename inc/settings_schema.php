@@ -52,6 +52,10 @@ function settings_schema(): array {
             ['cta_title', 'Bottom call-to-action heading', 'text', 'Your allocation is waiting', ''],
             ['cta_sub', 'Bottom call-to-action text', 'text', 'Create your free investor account in under two minutes.', ''],
         ]],
+        'referrals' => ['title' => 'Referral Rewards', 'icon' => '🎁', 'fields' => [
+            ['referral_enabled', 'Enable referral rewards', 'toggle', '1', 'Commission is credited only after the referred user’s first investment is confirmed.'],
+            ['referral_rate', 'Referral commission (%)', 'number', '5', 'Admin-controlled percentage of the first confirmed investment. Credited to wallet for plan purchases only.'],
+        ]],
         'invest' => ['title' => 'Investment Rules', 'icon' => '💼', 'fields' => [
             ['min_invest', 'Global minimum investment (₹)', 'number', '10000', 'A plan can set a higher minimum.'],
             ['kyc_required_before_payout', 'Require approved KYC before paying returns', 'toggle', '1', ''],
