@@ -3,7 +3,7 @@ require __DIR__ . '/inc/bootstrap.php';
 require __DIR__ . '/inc/layout.php';
 if (current_user()) redirect('dashboard.php');
 
-$v = ['name' => '', 'email' => '', 'phone' => '', 'city' => ''];
+$v = ['name' => '', 'email' => '', 'phone' => '', 'city' => '', 'referral_code' => strtoupper(get('ref'))];
 $errors = [];
 if (is_post()) {
     csrf_verify();
@@ -11,6 +11,9 @@ if (is_post()) {
     $pass = (string)($_POST['password'] ?? ''); $pass2 = (string)($_POST['password2'] ?? '');
     $v['email'] = strtolower($v['email']);
     if (post('website') !== '') exit; // honeypot
+    $v['referral_code'] = strtoupper(trim(post('referral_code', $v['referral_code'])));
+    $referrer = null;
+    if ($v['referral_code'] !== '') { $rs = db()->prepare('SELECT id FROM users WHERE referral_code = ? AND role = ? AND status = ?'); $rs->execute([$v['referral_code'], 'user', 'active']); $referrer = $rs->fetchColumn(); if (!$referrer) $errors[] = 'Referral code is invalid.'; }
     if (mb_strlen($v['name']) < 3) $errors[] = 'Please enter your full name.';
     if (!filter_var($v['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'Enter a valid email address.';
     if (!valid_phone($v['phone'])) $errors[] = 'Enter a valid 10-digit Indian mobile number.';
@@ -22,8 +25,8 @@ if (is_post()) {
         if ((int)$st->fetchColumn()) $errors[] = 'An account with this email already exists. Try logging in.';
     }
     if (!$errors) {
-        db()->prepare('INSERT INTO users (name,email,phone,password,role,status,city,kyc_status,created_at) VALUES (?,?,?,?,?,?,?,?,?)')
-            ->execute([$v['name'], $v['email'], $v['phone'], password_hash($pass, PASSWORD_DEFAULT), 'user', 'active', $v['city'], 'none', now()]);
+        db()->prepare('INSERT INTO users (name,email,phone,password,role,status,city,kyc_status,created_at,referral_code,referred_by) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+            ->execute([$v['name'], $v['email'], $v['phone'], password_hash($pass, PASSWORD_DEFAULT), 'user', 'active', $v['city'], 'none', now(), new_referral_code(), $referrer ? (int)$referrer : null]);
         $id = (int)db()->lastInsertId();
         $st = db()->prepare('SELECT * FROM users WHERE id = ?'); $st->execute([$id]); $u = $st->fetch();
         login_user($u);
@@ -56,6 +59,7 @@ public_header('Create account', ['body' => 'auth', 'noindex' => 1]);
       <label>Mobile number<input name="phone" value="<?= e($v['phone']) ?>" inputmode="numeric" maxlength="10" required autocomplete="tel-national" placeholder="10-digit number"></label>
     </div>
     <label>City<input name="city" value="<?= e($v['city']) ?>" autocomplete="address-level2"></label>
+    <label>Referral code (optional)<input name="referral_code" value="<?= e($v['referral_code']) ?>" maxlength="32" autocomplete="off"></label>
     <div class="grid2">
       <label>Password<input type="password" name="password" minlength="8" required autocomplete="new-password"></label>
       <label>Confirm password<input type="password" name="password2" minlength="8" required autocomplete="new-password"></label>
