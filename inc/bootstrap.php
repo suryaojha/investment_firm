@@ -27,6 +27,7 @@ if (!INSTALLED) {
     require ROOT . '/inc/mailer.php';
     require ROOT . '/inc/pdf.php';
     require ROOT . '/inc/invest.php';
+    require ROOT . '/inc/referrals.php';
     require ROOT . '/inc/payments.php';
 }
 
