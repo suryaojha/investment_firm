@@ -7,6 +7,12 @@ function new_referral_code(): string {
     } while ((int)$st->fetchColumn() > 0);
     return $code;
 }
+function get_or_create_referral_code(int $userId): string {
+    $st = db()->prepare('SELECT referral_code FROM users WHERE id = ?'); $st->execute([$userId]); $code = (string)$st->fetchColumn();
+    if ($code !== '') return $code;
+    $code = new_referral_code(); db()->prepare('UPDATE users SET referral_code = ? WHERE id = ? AND (referral_code IS NULL OR referral_code = \'\')')->execute([$code, $userId]);
+    $st = db()->prepare('SELECT referral_code FROM users WHERE id = ?'); $st->execute([$userId]); return (string)$st->fetchColumn();
+}
 function credit_referral_commission(array $investment): void {
     if (setting('referral_enabled', '1') !== '1') return;
     $pdo = db();
